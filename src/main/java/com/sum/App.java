@@ -1,22 +1,16 @@
 package com.sum;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 /**
  * Hello world!
- *
  */
-public class App 
-{
+public class App {
 
     public static void main(String[] args) {
-//        sum(5, 2);
-
+//        add(5, 2);
         sum_v2(5, 2);
     }
 
@@ -33,7 +27,7 @@ public class App
         System.out.println(sum);
         for (long i = ++c; i < n; i++) {
             productElements = productElements.divide(BigInteger.valueOf(firstProductElement))
-                    .multiply(BigInteger.valueOf(i));
+                                                .multiply(BigInteger.valueOf(i));
             sum = sum.add(productElements);
             firstProductElement += 1;
         }
@@ -47,11 +41,38 @@ public class App
 
     static void sum_v2(Integer n, Integer c) {
 
-        List<Integer> collect = IntStream.rangeClosed(1, c).parallel().collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+        IntStream.rangeClosed(1, c).mapToObj(BigInteger::valueOf).forEach(Calc::productThenSum);
+        LongStream.range(++c, n).mapToObj(BigInteger::valueOf).forEach(Calc::divideProductSum);
 
-        System.out.println(collect);
+
+        String sum = Calc.getSum().toString();
+
+        System.out.println(sum.length() > 10 ? sum.substring(0, 10) : sum);
 
     }
 
 
+    private static class Calc {
+
+        private static BigInteger product = BigInteger.ONE;
+        private static BigInteger sum = BigInteger.ZERO;
+        private static BigInteger holder = BigInteger.ONE;
+
+        static void productThenSum(BigInteger prod) {
+            product(prod);
+            add(product);
+        }
+
+        static void divideProductSum(BigInteger bigInteger) {
+            product = product.divide(holder).multiply(bigInteger);
+            holder = holder.add(BigInteger.ONE);
+            add(product);
+        }
+
+        static BigInteger getSum() { return sum; }
+
+        private static void product(BigInteger prod) { product = product.multiply(prod); }
+
+        private static void add(BigInteger bigInteger) { sum = sum.add(bigInteger); }
+    }
 }
